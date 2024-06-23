@@ -12,6 +12,13 @@
 #define ALE_VERSION "0.0.1"
 #define CTRL_KEY(k) ((k) & 0x1f)
 
+enum editorKey {
+	ARROW_LEFT = 1000,
+	ARROW_RIGHT,
+	ARROW_UP,
+	ARROW_DOWN,
+};
+
 struct editorConfig {
 	int cx, cy;
 	int screenrows;
@@ -32,11 +39,11 @@ struct abuf {
 void die(const char *s);
 void enableRawMode(void);
 void disableRawMode(void);
-char editorReadKey(void);
+int editorReadKey(void);
 void editorProcessKeypress(void);
 void editorRefreshScreen(void);
 void editorDrawRows(struct abuf *ab);
-void editorMoveCursor(char key);
+void editorMoveCursor(int key);
 void initEditor(void);
 int getWindowSize(int *rows, int *cols);
 int getCursorPosition(int *rows, int *cols);
@@ -91,7 +98,7 @@ void disableRawMode(void) {
 	}
 }
 
-char editorReadKey(void) {
+int editorReadKey(void) {
 	int nread;	
 	char c;
 
@@ -107,10 +114,10 @@ char editorReadKey(void) {
 		
 		if (seq[0] == '[') {
 			switch (seq[1]) {
-				case 'A': return 'k';
-				case 'B': return 'j';
-				case 'C': return 'l';
-				case 'D': return 'h';
+				case 'A': return ARROW_UP;
+				case 'B': return ARROW_DOWN;
+				case 'C': return ARROW_RIGHT;
+				case 'D': return ARROW_LEFT;
 			}
 		}
 
@@ -121,7 +128,7 @@ char editorReadKey(void) {
 }
 
 void editorProcessKeypress(void) {
-	char c = editorReadKey();
+	int c = editorReadKey();
 
 	printf("c: %d\n", c);
 
@@ -132,10 +139,10 @@ void editorProcessKeypress(void) {
 			exit(0);
 			break;
 
-		case 'h':
-		case 'j':
-		case 'k':
-		case 'l':
+		case ARROW_UP:
+		case ARROW_DOWN:
+		case ARROW_LEFT:
+		case ARROW_RIGHT:
 			editorMoveCursor(c);
 			break;
 	}
@@ -185,18 +192,18 @@ void editorDrawRows(struct abuf *ab) {
 	}
 }
 
-void editorMoveCursor(char key) {
+void editorMoveCursor(int key) {
 	switch (key) {
-		case 'h':
+		case ARROW_LEFT:
 			E.cx--;
 			break;
-		case 'l':
+		case ARROW_RIGHT:
 			E.cx++;
 			break;
-		case 'k':
+		case ARROW_UP:
 			E.cy--;
 			break;
-		case 'j':
+		case ARROW_DOWN:
 			E.cy++;
 			break;
 	}
